@@ -5,11 +5,14 @@ import { ContactList } from './contact-list/ContactList';
 import { Filter } from './filter/Filter';
 import css from './app.module.css'
 
-// import { addContact, removeContact } from 'redux/contacts/contactsAction';
-import { allContacts,getFilter } from 'redux/selectors';
+
+import { allContacts, getFilter,getIsLoading , getError} from 'redux/selectors';
 
 import { searchContacts } from 'redux/filterSlice';
-import { addContact, removeContact } from 'redux/contacstSlice';
+import { addNumber, getContacts, removeNumber } from 'redux/operations';
+import { useEffect } from 'react';
+
+
 
 
 
@@ -17,32 +20,34 @@ export  const App = () => {
 
   const contactsSecond = useSelector(allContacts)
   const searchContact = useSelector(getFilter)
+  const dispatch = useDispatch()  
+  const isLoading = useSelector(getIsLoading);
+  const error = useSelector(getError);
 
 
- const dispatch = useDispatch()
+  useEffect(()=>{
 
-
+dispatch(getContacts())
+  },[dispatch])
 
   const addContacts = (name, number) => {
     const checkContact = contactsSecond.map(contact => contact.name).includes(name)
     if (checkContact) {
       return alert(`${name} is alredy in contacts.`);
     }
-    const action = addContact({name, number})
+    const action = addNumber({name, number})
     dispatch(action)
   };
 
    const filterContacts = event =>{
     const filter = searchContacts(event.target.value)
-    // console.log(filter)
     dispatch(filter)
   }
 
    const removeContacts =(contactId)=>{
-    const action = removeContact(contactId)
+const action = removeNumber(contactId)
     dispatch(action)
   } 
-
   return(
 
     <div className={css.phonebook}>
@@ -58,8 +63,9 @@ export  const App = () => {
       onChange={filterContacts } 
       value={searchContact}
     />
+      {isLoading && !error && <b>Request in progress...</b>}
 
-    <ContactList
+   <ContactList
       onRemove={removeContacts}
       filter={searchContact}
       contacts={contactsSecond}

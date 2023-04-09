@@ -8,9 +8,7 @@ const filterSlice = createSlice({
     initialState: '',
     reducers:{
         searchContacts(_, {payload}){
-                console.log(payload)
-                return payload
-            
+            return payload
         }
     }
 })

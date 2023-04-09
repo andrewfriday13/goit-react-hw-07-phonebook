@@ -1,71 +1,104 @@
-import { nanoid } from "nanoid"
 import {  createSlice } from "@reduxjs/toolkit"
 
+import {addNumber, getContacts, removeNumber} from './operations'
 
-
-const initialState = [
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ];
-
+const handlePenging = state =>{
+     state.isLoading = true
+    }
+const handleRejected =(state,action) =>{
+     state.isLoading =false
+    state.error = action.payload}
 
 const contactsSlice = createSlice({
     name: 'contacts',
-    initialState,
-    reducers:{
-        addContact:{
-            reducer(state, action){
-                return [...state, action.payload];
-            },
-            prepare(contacts){
-                return{
-                    payload:{
-                        id: nanoid,
-                        ...contacts
-                        
-                    }
-                }
-            }
-        },
-        removeContact(state, action){
-           return state.filter(contact => contact.id !== action.payload)
-        }
-    }
+    initialState: {
+            contacts: [],
+            isLoading: false,
+            error: null
+          
+    },
+    extraReducers: builder => {
+        builder
+        .addCase(getContacts.pending, (state,action)=>{
+        state.isLoading =false
+        state.error = null
+    })
+    .addCase(removeNumber.pending, handlePenging)
+    .addCase(addNumber.pending, handlePenging)
+    
+    .addCase(getContacts.fulfilled,(state,action)=>{
+        state.isLoading =false
+        state.error = null
+        state.contacts = action.payload
+    })
+    .addCase(addNumber.fulfilled, (state, action)=>{
+        state.isLoading = false
+        state.contacts.push(action.payload)
+    })
+    .addCase(removeNumber.fulfilled,(state,action)=>{
+        state.isLoading = false
+        state.error= null
+        const index = state.contacts.findIndex(
+          task => task.id === action.payload.id
+        );
+        state.contacts.splice(index, 1);
+    })
+    .addCase(removeNumber.rejected, handleRejected )
+    .addCase(addNumber.rejected, handleRejected)
+    .addCase(getContacts.rejected,handleRejected )
+}
+ 
 })
 
-export const {addContact, removeContact} = contactsSlice.actions
+
 export const contactsReducer = contactsSlice.reducer;
 
 
+//   {
+//         [getContacts.pending](state, _){
+//             state.isLoading = true
+//         },
+//         [getContacts.fulfilled](state,action){
+//             state.isLoading =false
+//             state.error = null
+//             state.contacts = action.payload
+//         },
+//         [getContacts.rejected](state, action){
+//             console.log(action)
+//             state.isLoading =false
+//             state.error = action.payload
+            
+//         },
+//         [addNumber.pending](state, _){
+//             state.isLoading = true
+//         },
+//         [addNumber.fulfilled](state, action){
+//             state.isLoading = false
+//             state.contacts.push(action.payload) 
+//         },
+//         [addNumber.rejected](state, action){
+//             state.isLoading =false
+//             state.error = action.payload
+//         },
+//         [removeNumber.pending](state,_){
+//             state.isLoading = true
+//         },
+//         [removeNumber.fulfilled](state,action){
+//             state.isLoading = false
+//             state.error= null
+//             const index = state.contacts.findIndex(
+//               task => task.id === action.payload.id
+//             );
+//             state.contacts.splice(index, 1);
+//         },
+//         [removeNumber.rejected](state,action){
+//             state.isLoading =false
+//             state.error = action.payload
+//         }
+//     },
 
 
 
 
 
-
-
-
-// import { configureStore } from "@reduxjs/toolkit"
-// import storage from 'redux-persist/lib/storage'
-
-// import { contactsReducer } from "./contacts/contactsSlice"
-
-
- 
- 
-
-
-//  export const store =configureStore({
-//     reducer: persistedReducer, 
-//     middleware: (getDefaultMiddleware) =>
-//     getDefaultMiddleware({
-//       serializableCheck: {
-//         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-//       },
-//     }),
-//  })
- 
-//  export const persistor =persistStore(store)
 
